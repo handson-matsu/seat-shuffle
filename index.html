@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#168675">
+  <title>席決め・席替え</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="header"><span class="brand-mark" aria-hidden="true">▦</span><div><h1>席決め・席替え</h1><p>どこに座る？ くじで決めよう。</p></div></header>
+  <main>
+    <section class="card layout-section" aria-labelledby="layout-title">
+      <div class="section-heading"><h2 id="layout-title"><span class="step">1</span> 座席を準備</h2><span id="seat-total" class="badge"></span></div>
+      <details id="layout-settings"><summary>列数・座席数を設定する</summary>
+        <form id="layout-form">
+          <label class="field">列数<input id="column-count" type="number" min="1" max="20" value="4" required inputmode="numeric"></label>
+          <div id="column-fields" class="column-fields"></div>
+          <p class="hint">各列は上から下に並びます。列が多い場合は折り返します。</p>
+          <button class="primary" type="submit">この配置で作成</button>
+          <p id="layout-error" class="error" role="alert"></p>
+        </form>
+      </details>
+      <div class="board-toolbar"><span class="hint">入口・手前 ↓</span><button id="edit-position" class="small" aria-pressed="false">位置を調整</button></div>
+      <p id="drag-hint" class="hint" hidden>席をドラッグして移動。キーボードでは席にフォーカスして矢印キーで移動できます。</p>
+      <div id="seat-board" class="seat-board" aria-label="座席配置"></div>
+      <div class="board-footer"><span class="legend"><i></i> 直前に決まった席</span><button id="reset-position" class="text-button">配置をリセット</button></div>
+    </section>
+
+    <section class="card draw-section" aria-labelledby="draw-title">
+      <h2 id="draw-title"><span class="step">2</span> 席を決めよう</h2>
+      <div class="mode-tabs" role="group" aria-label="抽選モード"><button id="number-tab" aria-pressed="true">番号くじ</button><button id="name-tab" aria-pressed="false">名前で席決め</button></div>
+      <div id="number-panel"><p class="intro">名前の入力なしで、そのまま引けます。<br>スマートフォンを次の人に渡して使おう。</p><div class="counter" id="number-counter" aria-live="polite"></div><button id="draw-number" class="primary hero-button">くじを引く <span aria-hidden="true">→</span></button></div>
+      <div id="name-panel" hidden>
+        <form id="names-form"><label for="names-input" class="input-label">参加者の名前 <span>1行に1人</span></label><textarea id="names-input" rows="5" placeholder="佐藤&#10;鈴木&#10;田中&#10;山田"></textarea><p id="names-count" class="hint" aria-live="polite"></p><button class="primary" type="submit">名前を確定</button></form>
+        <div id="names-ready" hidden><p class="intro">自分の名前をタップして、席を引こう。</p><p id="names-status" class="hint" aria-live="polite"></p><div id="name-buttons" class="name-buttons"></div><div class="divider">まとめて決めるなら</div><button id="shuffle-all" class="primary">全員を一括シャッフル</button><p class="hint">やり直すと、抽選済みの人も含め全員の席が変わります。</p></div>
+        <p id="names-error" class="error" role="alert"></p>
+      </div>
+      <div class="reset-actions"><button id="reset-draw" class="text-button">抽選だけやり直す</button><button id="change-names" class="text-button" hidden>参加者を変更する</button><button id="rebuild-layout" class="text-button">座席配置を作り直す</button></div>
+      <p id="notice" class="notice" role="status"></p>
+    </section>
+  </main>
+  <footer>集まったみんなで、楽しいひとときを。</footer>
+  <dialog id="draw-dialog" aria-labelledby="result-title"><div class="dialog-inner"><p id="result-person"></p><h2 id="result-title"></h2><div id="result-number"></div><p id="result-note"></p><button id="dialog-action" class="primary hero-button"></button></div></dialog>
+</body>
+</html>
