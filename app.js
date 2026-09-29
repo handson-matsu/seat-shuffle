@@ -34,18 +34,46 @@ function clearDraws(all = false) {
   if (all || state.mode === "number") { state.numberSeats = []; state.lastNumber = null; }
   if (all || state.mode === "name") { state.assignments.clear(); state.lastName = null; }
 }
+function addStepper(input, name) {
+  const control = document.createElement("span");
+  control.className = "number-stepper";
+  const minus = document.createElement("button"), plus = document.createElement("button");
+  const sync = () => {
+    const value = input.valueAsNumber;
+    minus.disabled = Number.isFinite(value) && value <= Number(input.min);
+    plus.disabled = Number.isFinite(value) && value >= Number(input.max);
+  };
+  for (const [button, delta, text] of [[minus, -1, "−"], [plus, 1, "＋"]]) {
+    button.type = "button";
+    button.textContent = text;
+    button.setAttribute("aria-label", `${name}を1${delta < 0 ? "減らす" : "増やす"}`);
+    button.addEventListener("click", () => {
+      const value = input.valueAsNumber;
+      input.value = Math.max(Number(input.min), Math.min(Number(input.max), Number.isFinite(value) ? Math.trunc(value) + delta : Number(input.min)));
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+  }
+  input.replaceWith(control);
+  control.append(minus, input, plus);
+  input.addEventListener("input", sync);
+  sync();
+}
 function makeColumnFields(count) {
   const previous = [...$("column-fields").querySelectorAll("input")].map(input => input.value);
   $("column-fields").replaceChildren();
   for (let i = 0; i < count; i++) {
+    const field = document.createElement("div");
+    field.className = "field";
     const label = document.createElement("label");
-    label.className = "field";
-    label.append(`${i + 1}列目`);
+    label.textContent = `${i + 1}列目`;
+    label.htmlFor = `column-seats-${i}`;
     const input = document.createElement("input");
     Object.assign(input, { type: "number", min: "1", max: "100", required: true, value: previous[i] ?? state.columns[i] ?? 4, inputMode: "numeric" });
     input.setAttribute("aria-label", `${i + 1}列目の座席数`);
-    label.append(input);
-    $("column-fields").append(label);
+    input.id = label.htmlFor;
+    field.append(label, input);
+    addStepper(input, `${i + 1}列目の座席数`);
+    $("column-fields").append(field);
   }
 }
 $("column-count").addEventListener("input", event => {
@@ -82,7 +110,14 @@ function moveSeat(seat, dx, dy) {
 function renderBoard() {
   const board = $("seat-board");
   board.replaceChildren();
-  board.style.setProperty("--columns", Math.min(state.columns.length, 4));
+  board.style.setProperty("--columns", state.columns.length);
+  if (state.columns.length > 4) {
+    board.style.setProperty("--column-gap", `${Math.max(4, 8 - (state.columns.length - 4) * 2)}px`);
+    board.style.setProperty("--seat-font", `${Math.max(14, 21 - (state.columns.length - 4) * 2)}px`);
+    board.style.setProperty("--name-font", "12px");
+  } else {
+    ["--column-gap", "--seat-font", "--name-font"].forEach(property => board.style.removeProperty(property));
+  }
   board.classList.toggle("editing", state.editing);
   $("seat-total").textContent = `${totalSeats()} 席`;
   const used = state.mode === "number" ? new Set(state.numberSeats) : new Set(state.assignments.values());
@@ -221,4 +256,18 @@ $("seat-board").addEventListener("keydown", event => {
   if (state.editing && seat && deltas[event.key]) { event.preventDefault(); moveSeat(seat, ...deltas[event.key]); }
 });
 new ResizeObserver(() => { $("seat-board").querySelectorAll(".seat").forEach(seat => moveSeat(seat, 0, 0)); }).observe($("seat-board"));
+addStepper($("column-count"), "列数");
 makeColumnFields(4); render(); updateInputCount();
+
+// Record one visit per page load, matching number-slide-puzzle's request settings.
+try {
+  fetch('https://script.google.com/macros/s/AKfycbxssCIHsD-N97SHxNC_GN0ihYeC0qy-lb-EY0KmSs6Gnztaph1sITMerLVEnNWOGkYc/exec?app=seat-shuffle', {
+    method: 'GET',
+    mode: 'no-cors',
+    cache: 'no-store',
+    credentials: 'omit',
+    keepalive: true,
+  }).catch(() => {});
+} catch {
+  // Access logging must never interrupt the app; do not retry.
+}

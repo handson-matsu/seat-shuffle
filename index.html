@@ -15,16 +15,16 @@
       <div class="section-heading"><h2 id="layout-title"><span class="step">1</span> 座席を準備</h2><span id="seat-total" class="badge"></span></div>
       <details id="layout-settings"><summary>列数・座席数を設定する</summary>
         <form id="layout-form">
-          <label class="field">列数<input id="column-count" type="number" min="1" max="20" value="4" required inputmode="numeric"></label>
+          <div class="field"><label for="column-count">列数</label><input id="column-count" type="number" min="1" max="20" value="4" required inputmode="numeric"></div>
           <div id="column-fields" class="column-fields"></div>
-          <p class="hint">各列は上から下に並びます。列が多い場合は折り返します。</p>
+          <p class="hint">各列は上から下に並びます。横幅に収まらない場合は左右にスクロールできます。</p>
           <button class="primary" type="submit">この配置で作成</button>
           <p id="layout-error" class="error" role="alert"></p>
         </form>
       </details>
       <div class="board-toolbar"><span class="hint">入口・手前 ↓</span><button id="edit-position" class="small" aria-pressed="false">位置を調整</button></div>
       <p id="drag-hint" class="hint" hidden>席をドラッグして移動。キーボードでは席にフォーカスして矢印キーで移動できます。</p>
-      <div id="seat-board" class="seat-board" aria-label="座席配置"></div>
+      <div class="board-scroll" tabindex="0" role="region" aria-label="座席配置（横幅に収まらない場合は左右にスクロール）"><div id="seat-board" class="seat-board" aria-label="座席配置"></div></div>
       <div class="board-footer"><span class="legend"><i></i> 直前に決まった席</span><button id="reset-position" class="text-button">配置をリセット</button></div>
     </section>
 
