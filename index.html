@@ -6,6 +6,7 @@
   <meta name="theme-color" content="#168675">
   <title>席決め・席替え</title>
   <link rel="stylesheet" href="style.css">
+  <script src="roster-file.js" defer></script>
   <script src="app.js" defer></script>
 </head>
 <body>
@@ -33,9 +34,25 @@
       <div class="mode-tabs" role="group" aria-label="抽選モード"><button id="number-tab" aria-pressed="true">番号くじ</button><button id="name-tab" aria-pressed="false">名前で席決め</button></div>
       <div id="number-panel"><p class="intro">名前の入力なしで、そのまま引けます。<br>スマートフォンを次の人に渡して使おう。</p><div class="counter" id="number-counter" aria-live="polite"></div><button id="draw-number" class="primary hero-button">くじを引く <span aria-hidden="true">→</span></button></div>
       <div id="name-panel" hidden>
+        <details id="roster-settings" class="roster-settings"><summary>名簿ファイルを保存・開く</summary>
+          <p class="hint">名簿はJSONファイルで保存します。保存先の確認・削除は端末のファイル管理から行えます。</p>
+          <label for="roster-name" class="input-label">名簿名</label>
+          <input id="roster-name" type="text" placeholder="例：3年1組、ゼミ">
+          <div class="roster-actions"><button id="save-roster" type="button" class="small">名簿を保存</button><button id="open-roster" type="button" class="small">名簿を開く</button></div>
+          <input id="roster-file-input" type="file" accept=".json,application/json" hidden>
+          <p class="hint">保存するとファイルをダウンロードします。開いたファイルを自動で上書きすることはありません。</p>
+          <div id="roster-import" hidden>
+            <p id="roster-import-info" class="hint" role="status"></p>
+            <div class="roster-actions"><button id="load-roster" type="button" class="small">名簿だけ使う</button><button id="restore-arrangement" type="button" class="small">前回の配置も復元</button><button id="cancel-import" type="button" class="text-button">読み込みを取り消す</button></div>
+          </div>
+        </details>
+        <p id="roster-status" class="hint" role="status"></p>
+        <p id="file-error" class="error" role="alert"></p>
         <form id="names-form"><label for="names-input" class="input-label">参加者の名前 <span>1行に1人</span></label><textarea id="names-input" rows="5" placeholder="佐藤&#10;鈴木&#10;田中&#10;山田"></textarea><p id="names-count" class="hint" aria-live="polite"></p><button class="primary" type="submit">名前を確定</button></form>
-        <div id="names-ready" hidden><p class="intro">自分の名前をタップして、席を引こう。</p><p id="names-status" class="hint" aria-live="polite"></p><div id="name-buttons" class="name-buttons"></div><div class="divider">まとめて決めるなら</div><button id="shuffle-all" class="primary">全員を一括シャッフル</button><p class="hint">やり直すと、抽選済みの人も含め全員の席が変わります。</p></div>
+        <div id="names-ready" hidden><p class="intro">自分の名前をタップして、席を引こう。</p><p id="names-status" class="hint" aria-live="polite"></p><div class="attendance-toolbar"><button id="edit-attendance" type="button" class="small" aria-expanded="false" aria-controls="name-buttons">欠席者を設定</button><span id="attendance-count" class="hint" aria-live="polite"></span></div><div id="name-buttons" class="name-buttons"></div><div class="divider">まとめて決めるなら</div><button id="shuffle-all" class="primary">全員を一括シャッフル</button><p class="hint">やり直すと、抽選済みの人も含め全員の席が変わります。</p></div>
         <p id="names-error" class="error" role="alert"></p>
+        <p id="capacity-hint" class="hint" hidden>抽選はできます。座席数を超える参加者は未配置になります。</p>
+        <div id="arrangement-actions" hidden><button id="save-arrangement" type="button" class="small">この配置を保存</button><p class="hint">名簿データに反映します。端末に残すには、その後「名簿を保存」を押してください。</p></div>
       </div>
       <div class="reset-actions"><button id="reset-draw" class="text-button">抽選だけやり直す</button><button id="change-names" class="text-button" hidden>参加者を変更する</button><button id="rebuild-layout" class="text-button">座席配置を作り直す</button></div>
       <p id="notice" class="notice" role="status"></p>

@@ -1,11 +1,12 @@
 // Run with Node.js and Playwright available via NODE_PATH. No app dependencies.
-const { chromium } = require('playwright');
+const { startApp } = require('./support.cjs');
 const assert = require('node:assert/strict');
 const path = require('node:path');
-const { pathToFileURL } = require('node:url');
 
 (async () => {
-  const browser = await chromium.launch({ headless: true, channel: 'msedge' });
+  const app = await startApp();
+  const { browser } = app;
+  try {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true });
   const page = await context.newPage();
   const loggingUrl = 'https://script.google.com/macros/s/AKfycbxssCIHsD-N97SHxNC_GN0ihYeC0qy-lb-EY0KmSs6Gnztaph1sITMerLVEnNWOGkYc/exec?app=seat-shuffle';
@@ -36,7 +37,7 @@ const { pathToFileURL } = require('node:url');
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
   page.on('dialog', dialog => dialog.accept());
-  await page.goto(pathToFileURL(path.resolve(__dirname, '../index.html')).href);
+  await page.goto(app.url);
   await checkLogging();
   assert.equal(await page.locator('.seat').count(), 18);
   assert.deepEqual(await page.locator('.seat-column').evaluateAll(cols => cols.map(c => c.querySelectorAll('.seat').length)), [4, 5, 5, 4]);
@@ -71,8 +72,16 @@ const { pathToFileURL } = require('node:url');
   await page.locator('#change-names').click();
   await page.locator('#names-input').fill(Array.from({ length: 19 }, (_, i) => `参加者${i}`).join('\n'));
   await page.locator('#names-form button').click();
-  assert(await page.locator('#shuffle-all').isDisabled());
+  assert(await page.locator('#shuffle-all').isEnabled());
+  assert.match(await page.locator('#names-error').textContent(), /参加者が座席数を超えています/);
+  await page.locator('#shuffle-all').click();
+  assert.equal(await page.locator('.seat.has-name').count(), 18);
   assert.equal(await page.locator('#name-buttons button:disabled').count(), 19);
+  assert.match(await page.locator('#names-status').textContent(), /未配置 1人.*満席/);
+  await page.locator('#reset-draw').click();
+  await page.locator('#number-tab').click();
+  await page.locator('#reset-draw').click();
+  await page.locator('#name-tab').click();
   await page.locator('#rebuild-layout').click();
   await page.locator('#column-count').fill('3');
   for (const [index, count] of [2, 3, 1].entries()) await page.locator('#column-fields input').nth(index).fill(String(count));
@@ -151,6 +160,7 @@ const { pathToFileURL } = require('node:url');
       await page.locator('#dialog-action').click();
       assert.equal(await page.locator('.seat.assigned').count(), 1);
       assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `overflow at ${width}/${count}`);
+      await page.locator('#reset-draw').click();
       await page.locator('#rebuild-layout').click();
     }
     assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `overflow at ${width}`);
@@ -162,6 +172,6 @@ const { pathToFileURL } = require('node:url');
   assert.deepEqual(errors, []);
   await checkLogging();
   console.log('PASS: matching logging settings; one GET per page load; no extra requests during draws, shuffles, layout changes or simulated network failures.');
-  console.log('PASS: layout, numbering, 18 unique draws, names, individual draw, repeat prevention, 12 shuffles, empty seats, capacity block, mouse/touch drag, 320–1280px overflow, no browser errors.');
-  await browser.close();
+  console.log('PASS: layout, numbering, 18 unique draws, names, individual draw, repeat prevention, 12 shuffles, empty seats, capacity overflow, mouse/touch drag, 320–1280px overflow, no browser errors.');
+  } finally { await app.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });

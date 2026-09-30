@@ -13,3 +13,7 @@
 .column-fields{grid-template-columns:repeat(auto-fit,minmax(152px,1fr))}
 .column-fields .field{flex-direction:column;align-items:flex-start;gap:8px}
 @media(max-width:760px){.seat-board{--column-gap:8px;--board-padding:8px}}
+
+/* File controls and optional attendance editor reuse the existing card styles. */
+.roster-settings{margin-top:18px}.roster-settings input[type=text]{width:100%;min-width:0;max-width:100%;margin-bottom:10px}.roster-actions{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}.roster-actions button{flex:1 1 130px}.roster-settings .input-label{display:block}#roster-status,#roster-import-info{overflow-wrap:anywhere}#save-arrangement{margin-top:10px}
+.attendance-toolbar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:12px 0}.person-item{min-width:0}.person-item .person-draw{width:100%;height:100%}.person-item.absent .person-draw{background:#f2f3f2}.person-item .absence-badge{font-size:11px;margin-left:6px;white-space:nowrap}.person-item.attendance-editing{border:1px solid var(--line);border-radius:12px;overflow:hidden}.person-item.attendance-editing .person-draw{border:0;border-radius:0;height:auto;min-height:48px}.person-item label{display:flex;align-items:center;justify-content:center;gap:6px;min-height:48px;padding:6px;font-size:12px;cursor:pointer;border-top:1px solid var(--line)}.person-item input{width:20px;height:20px;min-height:20px;accent-color:var(--green);margin:0;flex-shrink:0}
